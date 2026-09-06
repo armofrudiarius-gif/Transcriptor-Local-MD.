@@ -1,0 +1,35 @@
+# Transcriptor Local MD v2.0 — lexicon inițial configurabil
+# Formele de mai jos sunt indicii lexicale pentru testare/corectare grafică locală.
+# Nu reprezintă o listă exhaustivă și nu trebuie folosite pentru normalizare semantică automată.
+
+Chișinău
+Bălți
+Ialoveni
+Orhei
+Hîncești
+Cahul
+Ungheni
+Soroca
+Comrat
+Anenii Noi
+CNA
+CNPF
+CNAM
+CAPCS
+AMDM
+ANI
+SFS
+IGPF
+Serviciul Vamal
+Judecătoria Chișinău
+Curtea de Apel
+ciubotă
+ogradă
+glod
+colb
+hulub
+curechi
+omăt
+stroică
+spravcă
+marșrutkă
