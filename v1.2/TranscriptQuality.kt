@@ -23,7 +23,7 @@ object TranscriptQuality {
         val clean = text.trim()
         if (clean.isBlank()) return false
         val letters = clean.filter { it.isLetter() }
-        if (letters.size < 2) return false
+        if (letters.length < 2) return false
         if (letters.any { !isLatin(it) && !isCyrillic(it) }) return false
 
         val tokens = clean.lowercase().split(Regex("\\s+")).filter { it.any(Char::isLetter) }
