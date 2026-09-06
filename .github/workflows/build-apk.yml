@@ -1,4 +1,4 @@
-name: Build offline Android APK
+name: Build corrected offline Android APK
 on:
   push:
     branches: [ main ]
@@ -11,18 +11,23 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      - name: Extract corrected v1.1 project
+      - name: Extract known-good v1.0 project
         run: |
-          base64 -d source-v1.1.tar.xz.b64 > source-v1.1.tar.xz
           mkdir project
-          tar -xJf source-v1.1.tar.xz -C project
+          tar -xJf source.tar.xz -C project
+      - name: Apply v1.1 RO/RU corrections
+        run: |
+          cp v1.1/OfflineTranscriber.kt project/app/src/main/java/md/localtranscript/OfflineTranscriber.kt
+          cp v1.1/prepare_offline_bundle.sh project/prepare_offline_bundle.sh
+          cp v1.1/app-build.gradle.kts project/app/build.gradle.kts
+          chmod +x project/prepare_offline_bundle.sh
       - name: Download pinned offline inference bundle
         run: cd project && ./prepare_offline_bundle.sh
       - name: Build debug APK
