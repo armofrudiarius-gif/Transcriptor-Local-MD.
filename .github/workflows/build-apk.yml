@@ -1,4 +1,4 @@
-name: Build corrected offline Android APK
+name: Build Transcriptor Local MD v1.2
 on:
   push:
     branches: [ main ]
@@ -18,33 +18,73 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      - name: Extract known-good v1.0 project
+
+      - name: Extract known-good base project
         run: |
           mkdir project
           tar -xJf source.tar.xz -C project
-      - name: Apply v1.1 RO/RU corrections
+
+      - name: Apply v1.2 source
         run: |
-          cp v1.1/OfflineTranscriber.kt project/app/src/main/java/md/localtranscript/OfflineTranscriber.kt
+          cp v1.2/OfflineTranscriber.kt project/app/src/main/java/md/localtranscript/OfflineTranscriber.kt
+          cp v1.2/MainActivity.kt project/app/src/main/java/md/localtranscript/MainActivity.kt
+          cp v1.2/TranscriptTypes.kt project/app/src/main/java/md/localtranscript/TranscriptTypes.kt
+          cp v1.2/LocalLexicon.kt project/app/src/main/java/md/localtranscript/LocalLexicon.kt
+          cp v1.2/TranscriptQuality.kt project/app/src/main/java/md/localtranscript/TranscriptQuality.kt
+          cp v1.2/TranscriptFormatter.kt project/app/src/main/java/md/localtranscript/TranscriptFormatter.kt
+          cp v1.2/app-build.gradle.kts project/app/build.gradle.kts
           cp v1.1/prepare_offline_bundle.sh project/prepare_offline_bundle.sh
-          cp v1.1/app-build.gradle.kts project/app/build.gradle.kts
           chmod +x project/prepare_offline_bundle.sh
+          mkdir -p project/app/src/test/java/md/localtranscript
+          cp v1.2/tests/*.kt project/app/src/test/java/md/localtranscript/
+
+      - name: Verify source privacy policy
+        run: |
+          ! grep -R -n 'android.permission.INTERNET' project/app/src/main/AndroidManifest.xml
+          ! grep -R -n 'android.permission.ACCESS_NETWORK_STATE' project/app/src/main/AndroidManifest.xml
+          ! grep -R -n -E 'OkHttp|Retrofit|http://|https://' project/app/src/main/java || true
+
       - name: Download pinned offline inference bundle
         run: cd project && ./prepare_offline_bundle.sh
+
+      - name: Run unit tests
+        run: cd project && gradle --no-daemon :app:testDebugUnitTest
+
       - name: Build debug APK
         run: cd project && gradle --no-daemon :app:assembleDebug
-      - name: Verify no runtime network permission
+
+      - name: Verify compiled APK permissions
         run: |
-          ! grep -q 'android.permission.INTERNET' project/app/src/main/AndroidManifest.xml
-          ! grep -q 'android.permission.ACCESS_NETWORK_STATE' project/app/src/main/AndroidManifest.xml
-      - name: Prepare release APK
-        run: cp project/app/build/outputs/apk/debug/app-debug.apk TranscriptorMD-v1.1.apk
+          APK=project/app/build/outputs/apk/debug/app-debug.apk
+          AAPT=$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -1)
+          "$AAPT" dump permissions "$APK" | tee apk-permissions.txt
+          ! grep -q 'android.permission.INTERNET' apk-permissions.txt
+          ! grep -q 'android.permission.ACCESS_NETWORK_STATE' apk-permissions.txt
+          grep -q 'android.permission.RECORD_AUDIO' apk-permissions.txt
+
+      - name: Prepare release files
+        run: |
+          cp project/app/build/outputs/apk/debug/app-debug.apk TranscriptorMD-v1.2.apk
+          sha256sum TranscriptorMD-v1.2.apk | tee TranscriptorMD-v1.2.apk.sha256
+          ls -lh TranscriptorMD-v1.2.apk
+
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v1.1-fixed TranscriptorMD-v1.1.apk --title "Transcriptor Local MD v1.1" --notes "Offline Android APK. Romanian (Moldova) and Russian transcription with local speaker diarization. No INTERNET or ACCESS_NETWORK_STATE permission."
+          gh release view v1.2 >/dev/null 2>&1 && gh release delete v1.2 -y --cleanup-tag || true
+          gh release create v1.2 \
+            TranscriptorMD-v1.2.apk \
+            TranscriptorMD-v1.2.apk.sha256 \
+            apk-permissions.txt \
+            --title "Transcriptor Local MD v1.2" \
+            --notes-file CHANGELOG-v1.2.md
+
       - uses: actions/upload-artifact@v4
         with:
-          name: Transcriptor-Local-MD-v1.1-debug
-          path: TranscriptorMD-v1.1.apk
+          name: Transcriptor-Local-MD-v1.2
+          path: |
+            TranscriptorMD-v1.2.apk
+            TranscriptorMD-v1.2.apk.sha256
+            apk-permissions.txt
           if-no-files-found: error
