@@ -54,7 +54,7 @@ jobs:
         run: |
           ! grep -R -n 'android.permission.INTERNET' project/app/src/main/AndroidManifest.xml
           ! grep -R -n 'android.permission.ACCESS_NETWORK_STATE' project/app/src/main/AndroidManifest.xml
-          if grep -R -n -E 'OkHttp|Retrofit|HttpURLConnection|java\.net\.URL|https?://' project/app/src/main/java; then
+          if grep -R -n -E 'OkHttp|Retrofit|HttpURLConnection|java\.net\.URL|java\.net\.Socket|WebSocket' project/app/src/main/java; then
             echo 'Runtime network-capable code detected' >&2
             exit 1
           fi
