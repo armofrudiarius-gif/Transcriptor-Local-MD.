@@ -18,10 +18,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      - name: Extract project
+      - name: Extract corrected v1.1 project
         run: |
+          base64 -d source-v1.1.tar.xz.b64 > source-v1.1.tar.xz
           mkdir project
-          tar -xJf source.tar.xz -C project
+          tar -xJf source-v1.1.tar.xz -C project
       - name: Download pinned offline inference bundle
         run: cd project && ./prepare_offline_bundle.sh
       - name: Build debug APK
@@ -32,6 +33,6 @@ jobs:
           ! grep -q 'android.permission.ACCESS_NETWORK_STATE' project/app/src/main/AndroidManifest.xml
       - uses: actions/upload-artifact@v4
         with:
-          name: Transcriptor-Local-MD-debug
+          name: Transcriptor-Local-MD-v1.1-debug
           path: project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
