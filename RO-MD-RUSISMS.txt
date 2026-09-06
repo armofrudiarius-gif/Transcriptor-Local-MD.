@@ -1,0 +1,22 @@
+# Exemple RO-MD / RU pentru testare ASR și code-switching
+# Scop: fidelitate a transcrierii, nu prescriere lingvistică.
+
+stroică
+spravcă
+marșrutkă
+otdel
+tamojnea
+osvobodit
+propiska
+povorot
+spravochnik
+subotnic
+
+# Exemple de propoziții sintetice pentru QA:
+m-am osvobodit mai devreme
+am sunat la otdel
+el lucrează la tamojnea
+mergem cu marșrutka până în centru
+adu spravca și apoi mergem
+сейчас vorbesc cu el și revin
+mâine trebuie să merg la отдел
